@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071a12">
+  <title>2026 世界盃即時看板</title>
+  <link rel="preconnect" href="https://site.api.espn.com">
+  <link rel="preconnect" href="https://a.espncdn.com">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <nav class="topbar">
+        <a class="brand" href="#top" aria-label="回到頂端">
+          <span class="brand-mark">26</span>
+          <span>WORLD CUP<br><strong>LIVE BOARD</strong></span>
+        </a>
+        <div class="top-actions">
+          <a class="bet-button" href="https://www.sportslottery.com.tw/" target="_blank" rel="noopener noreferrer">
+            台灣運彩官方投注
+            <span aria-hidden="true">↗</span>
+          </a>
+          <button id="refreshButton" class="refresh-button" type="button">
+            <span class="refresh-icon" aria-hidden="true">↻</span>
+            立即更新
+          </button>
+        </div>
+      </nav>
+
+      <div id="top" class="hero-content">
+        <p class="eyebrow">CANADA · MEXICO · UNITED STATES</p>
+        <h1>每一場，都不錯過。</h1>
+        <p class="hero-copy">2026 世界盃完整 104 場賽程與即時比分，以台灣時間呈現。</p>
+        <div class="status-row">
+          <span id="connectionStatus" class="connection-status">
+            <i></i>正在連線
+          </span>
+          <span id="lastUpdated">尚未更新</span>
+          <span>每 60 秒自動更新</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="overview" aria-label="賽事摘要">
+        <article class="stat-card accent-card">
+          <span class="stat-label">下一場比賽</span>
+          <strong id="nextMatchTime" class="stat-value">--</strong>
+          <span id="nextMatchTeams" class="stat-detail">讀取中</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">已完成</span>
+          <strong id="completedCount" class="stat-value">--</strong>
+          <span class="stat-detail">場比賽</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">進行中</span>
+          <strong id="liveCount" class="stat-value live-number">--</strong>
+          <span class="stat-detail">場比賽</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">總場次</span>
+          <strong id="totalCount" class="stat-value">104</strong>
+          <span class="stat-detail">2026 世界盃</span>
+        </article>
+      </section>
+
+      <section class="board">
+        <div class="board-heading">
+          <div>
+            <p class="section-kicker">MATCH CENTRE</p>
+            <h2>賽程中心</h2>
+          </div>
+          <div class="view-controls">
+            <div class="filter-tabs" role="tablist" aria-label="比賽篩選">
+              <button class="filter-tab active" data-filter="all" type="button">全部</button>
+              <button class="filter-tab" data-filter="live" type="button">進行中</button>
+              <button class="filter-tab" data-filter="upcoming" type="button">未來賽事</button>
+              <button class="filter-tab" data-filter="completed" type="button">已完賽</button>
+            </div>
+            <label class="date-picker">
+              <span>跳至日期</span>
+              <input id="datePicker" type="date" min="2026-06-11" max="2026-07-19">
+            </label>
+          </div>
+        </div>
+
+        <div id="errorMessage" class="error-message" hidden>
+          <strong>暫時無法取得最新資料</strong>
+          <span>請檢查網路連線後再按「立即更新」。</span>
+        </div>
+
+        <div id="schedule" class="schedule" aria-live="polite">
+          <div class="loading-state">
+            <div class="loader"></div>
+            <p>正在整理 104 場賽事...</p>
+          </div>
+        </div>
+
+        <button id="loadMoreButton" class="load-more" type="button" hidden>顯示更多賽事</button>
+      </section>
+    </main>
+
+    <footer>
+      <p>時間皆為台灣時間（UTC+8）</p>
+      <p>賽事資料由 ESPN 公開比分服務提供，重要資訊請以 FIFA 官方公告為準。</p>
+    </footer>
+  </div>
+
+  <template id="matchTemplate">
+    <article class="match-card">
+      <div class="match-meta">
+        <span class="match-stage"></span>
+        <span class="match-status"></span>
+      </div>
+      <div class="match-body">
+        <div class="team home-team">
+          <img class="team-logo" alt="">
+          <span class="team-name"></span>
+        </div>
+        <div class="score-block">
+          <strong class="score"></strong>
+          <span class="kickoff-label"></span>
+          <strong class="kickoff"></strong>
+        </div>
+        <div class="team away-team">
+          <img class="team-logo" alt="">
+          <span class="team-name"></span>
+        </div>
+      </div>
+      <div class="match-footer">
+        <span class="venue"></span>
+      </div>
+    </article>
+  </template>
+
+  <script src="./app.js"></script>
+</body>
+</html>
