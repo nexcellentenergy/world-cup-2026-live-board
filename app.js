@@ -86,6 +86,8 @@ const stageNames = {
 const state = {
   events: [],
   ratings: { ...BASE_ELO },
+  baseH2H: {},
+  h2h: {},
   filter: "all",
   visibleGroups: INITIAL_DATE_GROUPS,
   isLoading: false
@@ -215,6 +217,91 @@ function predictMatch(match) {
   return { home: homePct, draw: drawPct, away: 100 - homePct - drawPct };
 }
 
+function pairKey(teamA, teamB) {
+  return teamA < teamB ? `${teamA}|${teamB}` : `${teamB}|${teamA}`;
+}
+
+function addMatchToH2H(collection, match) {
+  const home = match.home.sourceName;
+  const away = match.away.sourceName;
+  const homeScore = Number(match.home.score);
+  const awayScore = Number(match.away.score);
+  if (home === "TBD" || away === "TBD" || !Number.isFinite(homeScore) || !Number.isFinite(awayScore)) return;
+
+  const key = pairKey(home, away);
+  const [first] = key.split("|");
+  const item = collection[key] || {
+    total: 0,
+    firstWins: 0,
+    draws: 0,
+    secondWins: 0,
+    recent: []
+  };
+  item.total += 1;
+  if (homeScore === awayScore) item.draws += 1;
+  else {
+    const winner = homeScore > awayScore ? home : away;
+    if (winner === first) item.firstWins += 1;
+    else item.secondWins += 1;
+  }
+  item.recent.push({
+    date: match.date.toISOString().slice(0, 10),
+    home,
+    away,
+    homeScore,
+    awayScore,
+    tournament: "FIFA World Cup"
+  });
+  item.recent.sort((a, b) => b.date.localeCompare(a.date));
+  item.recent = item.recent.slice(0, 5);
+  collection[key] = item;
+}
+
+function rebuildH2H() {
+  const collection = Object.fromEntries(
+    Object.entries(state.baseH2H).map(([key, item]) => [
+      key,
+      { ...item, recent: item.recent.map((game) => ({ ...game })) }
+    ])
+  );
+  state.events
+    .filter((match) => match.completed)
+    .sort((a, b) => a.date - b.date)
+    .forEach((match) => addMatchToH2H(collection, match));
+  state.h2h = collection;
+}
+
+function renderH2H(card, match) {
+  const panel = card.querySelector(".h2h");
+  const item = state.h2h[pairKey(match.home.sourceName, match.away.sourceName)];
+  panel.hidden = false;
+
+  if (!item) {
+    panel.classList.add("no-history");
+    panel.querySelector(".h2h-summary").textContent = "尚無直接交手紀錄";
+    return;
+  }
+
+  const [first] = pairKey(match.home.sourceName, match.away.sourceName).split("|");
+  const homeWins = match.home.sourceName === first ? item.firstWins : item.secondWins;
+  const awayWins = match.away.sourceName === first ? item.firstWins : item.secondWins;
+  panel.querySelector(".h2h-summary").textContent =
+    `共 ${item.total} 場｜${match.home.name} ${homeWins} 勝・和 ${item.draws}・${match.away.name} ${awayWins} 勝`;
+
+  const list = panel.querySelector(".h2h-list");
+  item.recent.forEach((game) => {
+    const row = document.createElement("div");
+    row.className = "h2h-game";
+    const gameDate = game.date.replaceAll("-", "/");
+    row.innerHTML =
+      `<time>${gameDate}</time>` +
+      `<span>${localTeamName(game.home)}</span>` +
+      `<strong>${game.homeScore} : ${game.awayScore}</strong>` +
+      `<span>${localTeamName(game.away)}</span>`;
+    list.append(row);
+  });
+}
+
 function statusText(match) {
   if (match.statusState === "in") return match.statusDetail || "進行中";
   if (match.completed) return "已完賽";
@@ -276,6 +363,7 @@ function createMatchCard(match) {
     panel.querySelector(".prob-home-label").textContent = `${match.home.name} ${prediction.home}%`;
     panel.querySelector(".prob-draw-label").textContent = `和局 ${prediction.draw}%`;
     panel.querySelector(".prob-away-label").textContent = `${match.away.name} ${prediction.away}%`;
+    renderH2H(card, match);
   }
 
   return card;
@@ -389,9 +477,18 @@ async function fetchMatches({ silent = false } = {}) {
   if (!silent) setConnectionStatus("", "正在連線");
 
   try {
-    const response = await fetch(`${API_URL}&_=${Date.now()}`, { cache: "no-store" });
+    const h2hRequest = Object.keys(state.baseH2H).length
+      ? Promise.resolve(null)
+      : fetch("./h2h.json", { cache: "force-cache" })
+          .then((response) => response.ok ? response.json() : null)
+          .catch(() => null);
+    const [response, h2hData] = await Promise.all([
+      fetch(`${API_URL}&_=${Date.now()}`, { cache: "no-store" }),
+      h2hRequest
+    ]);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
+    if (h2hData) state.baseH2H = h2hData;
     state.events = (data.events || [])
       .map(normalizeEvent)
       .sort((a, b) => a.date - b.date);
@@ -399,6 +496,7 @@ async function fetchMatches({ silent = false } = {}) {
     if (!state.events.length) throw new Error("資料中沒有賽事");
 
     rebuildRatings();
+    rebuildH2H();
     elements.errorMessage.hidden = true;
     setConnectionStatus("online", "即時資料已連線");
     elements.lastUpdated.textContent = `更新於 ${timeFormatter.format(new Date())}`;
