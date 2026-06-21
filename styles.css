@@ -324,6 +324,24 @@ h2 {
   background: var(--green);
 }
 
+.filter-tab b {
+  display: inline-grid;
+  min-width: 22px;
+  height: 22px;
+  margin-left: 4px;
+  padding: 0 5px;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--green);
+  background: rgba(12, 79, 50, 0.09);
+  font-size: 10px;
+}
+
+.filter-tab.active b {
+  color: var(--green-dark);
+  background: var(--lime);
+}
+
 .date-picker {
   display: flex;
   align-items: center;
@@ -350,6 +368,71 @@ h2 {
 .date-group {
   margin-bottom: 34px;
   scroll-margin-top: 18px;
+}
+
+.model-note {
+  display: flex;
+  gap: 12px;
+  margin: 0 0 30px;
+  padding: 14px 17px;
+  border-left: 4px solid var(--green);
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.model-note strong {
+  flex: 0 0 auto;
+  color: var(--ink);
+}
+
+.status-section {
+  margin-bottom: 58px;
+}
+
+.status-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  color: white;
+  background: var(--green-dark);
+}
+
+.status-section-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-section-heading span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--lime);
+}
+
+.status-section-heading strong {
+  font-size: 19px;
+}
+
+.status-section-heading small,
+.status-section-heading > b {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.live-section .status-section-heading span {
+  background: #ff625b;
+  box-shadow: 0 0 0 5px rgba(255, 98, 91, 0.15);
+}
+
+.completed-section .status-section-heading {
+  background: #56645d;
 }
 
 .date-heading {
@@ -402,6 +485,72 @@ h2 {
   gap: 12px;
   color: var(--muted);
   font-size: 11px;
+}
+
+.prediction {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eceee9;
+}
+
+.prediction[hidden] {
+  display: none;
+}
+
+.prediction-heading,
+.probability-labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.prediction-heading {
+  margin-bottom: 8px;
+  font-size: 10px;
+}
+
+.prediction-heading strong {
+  color: var(--green);
+}
+
+.prediction-heading span {
+  color: var(--muted);
+}
+
+.probability-bar {
+  display: flex;
+  width: 100%;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #d9ddd5;
+}
+
+.probability-bar i {
+  display: block;
+  height: 100%;
+}
+
+.prob-home { background: var(--green); }
+.prob-draw { background: #aab3ad; }
+.prob-away { background: #d6a333; }
+
+.probability-labels {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.probability-labels span:first-child {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.probability-labels span:last-child {
+  color: #9a6c05;
+  font-weight: 700;
+  text-align: right;
 }
 
 .match-status.live {
@@ -646,6 +795,15 @@ footer p {
 
   .filter-tab {
     flex: 0 0 auto;
+  }
+
+  .model-note {
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .status-section-heading small {
+    display: none;
   }
 
   footer {

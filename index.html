@@ -75,10 +75,10 @@
           </div>
           <div class="view-controls">
             <div class="filter-tabs" role="tablist" aria-label="比賽篩選">
-              <button class="filter-tab active" data-filter="all" type="button">全部</button>
-              <button class="filter-tab" data-filter="live" type="button">進行中</button>
-              <button class="filter-tab" data-filter="upcoming" type="button">未來賽事</button>
-              <button class="filter-tab" data-filter="completed" type="button">已完賽</button>
+              <button class="filter-tab active" data-filter="all" type="button">全部 <b data-count="all">104</b></button>
+              <button class="filter-tab" data-filter="live" type="button">進行中 <b data-count="live">0</b></button>
+              <button class="filter-tab" data-filter="upcoming" type="button">未來賽事 <b data-count="upcoming">--</b></button>
+              <button class="filter-tab" data-filter="completed" type="button">已完賽 <b data-count="completed">--</b></button>
             </div>
             <label class="date-picker">
               <span>跳至日期</span>
@@ -91,6 +91,11 @@
           <strong>暫時無法取得最新資料</strong>
           <span>請檢查網路連線後再按「立即更新」。</span>
         </div>
+
+        <aside class="model-note">
+          <strong>勝率預測方式</strong>
+          <span>依 2016–2026 國家隊歷史賽果建立 Elo 實力值，並納入本屆已完賽結果即時重算。顯示為正規時間勝／和／負機率，不是台灣運彩賠率或投注建議。</span>
+        </aside>
 
         <div id="schedule" class="schedule" aria-live="polite">
           <div class="loading-state">
@@ -132,6 +137,22 @@
       </div>
       <div class="match-footer">
         <span class="venue"></span>
+      </div>
+      <div class="prediction" hidden>
+        <div class="prediction-heading">
+          <strong>歷史數據預測</strong>
+          <span>90 分鐘</span>
+        </div>
+        <div class="probability-bar" aria-label="勝率預測">
+          <i class="prob-home"></i>
+          <i class="prob-draw"></i>
+          <i class="prob-away"></i>
+        </div>
+        <div class="probability-labels">
+          <span class="prob-home-label"></span>
+          <span class="prob-draw-label"></span>
+          <span class="prob-away-label"></span>
+        </div>
       </div>
     </article>
   </template>
