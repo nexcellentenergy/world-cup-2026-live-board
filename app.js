@@ -88,6 +88,7 @@ const state = {
   ratings: { ...BASE_ELO },
   baseH2H: {},
   h2h: {},
+  tournamentStats: {},
   filter: "all",
   visibleGroups: INITIAL_DATE_GROUPS,
   isLoading: false
@@ -282,6 +283,66 @@ function rebuildRatings() {
   state.ratings = ratings;
 }
 
+function emptyTournamentStats() {
+  return { played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, recent: [] };
+}
+
+function rebuildTournamentStats() {
+  const stats = {};
+  state.events
+    .filter((match) => match.completed)
+    .sort((a, b) => a.date - b.date)
+    .forEach((match) => {
+      const homeScore = Number(match.home.score);
+      const awayScore = Number(match.away.score);
+      if (!Number.isFinite(homeScore) || !Number.isFinite(awayScore)) return;
+      const home = stats[match.home.sourceName] ||= emptyTournamentStats();
+      const away = stats[match.away.sourceName] ||= emptyTournamentStats();
+      home.played += 1;
+      away.played += 1;
+      home.goalsFor += homeScore;
+      home.goalsAgainst += awayScore;
+      away.goalsFor += awayScore;
+      away.goalsAgainst += homeScore;
+
+      const homeResult = homeScore > awayScore ? "W" : homeScore < awayScore ? "L" : "D";
+      const awayResult = homeScore > awayScore ? "L" : homeScore < awayScore ? "W" : "D";
+      if (homeResult === "W") { home.wins += 1; away.losses += 1; }
+      else if (homeResult === "L") { home.losses += 1; away.wins += 1; }
+      else { home.draws += 1; away.draws += 1; }
+
+      home.recent.push({ result: homeResult, score: `${homeScore}:${awayScore}`, opponent: match.away.name });
+      away.recent.push({ result: awayResult, score: `${awayScore}:${homeScore}`, opponent: match.home.name });
+      home.recent = home.recent.slice(-3);
+      away.recent = away.recent.slice(-3);
+    });
+  state.tournamentStats = stats;
+}
+
+function renderTournamentStats(card, match) {
+  if (match.home.sourceName === "TBD" || match.away.sourceName === "TBD") return;
+  const panel = card.querySelector(".tournament-form");
+  const list = panel.querySelector(".tournament-form-list");
+  panel.hidden = false;
+
+  [match.home, match.away].forEach((team) => {
+    const stats = state.tournamentStats[team.sourceName] || emptyTournamentStats();
+    const row = document.createElement("div");
+    row.className = "tournament-team-row";
+    const recent = stats.recent.length
+      ? stats.recent.map((game) =>
+          `<span class="form-result ${game.result.toLowerCase()}" title="對 ${game.opponent} ${game.score}">${game.result}</span>`
+        ).join("")
+      : '<span class="form-empty">尚未出賽</span>';
+    row.innerHTML =
+      `<div class="tournament-team"><img src="${team.logo}" alt=""><strong>${team.name}</strong></div>` +
+      `<div class="tournament-record"><b>${stats.wins}</b>勝 <b>${stats.draws}</b>和 <b>${stats.losses}</b>負</div>` +
+      `<div class="tournament-goals">進 ${stats.goalsFor}・失 ${stats.goalsAgainst}</div>` +
+      `<div class="tournament-recent">${recent}</div>`;
+    list.append(row);
+  });
+}
+
 function predictMatch(match) {
   const homeRating = state.ratings[match.home.sourceName] || 1500;
   const awayRating = state.ratings[match.away.sourceName] || 1500;
@@ -429,6 +490,7 @@ function createMatchCard(match) {
   awayLogo.alt = `${match.away.name}隊徽`;
   awayLogo.hidden = !match.away.logo;
   card.querySelector(".away-team .team-name").textContent = match.away.name;
+  renderTournamentStats(card, match);
   renderGoals(card, match);
 
   if (match.statusState === "pre") {
@@ -574,6 +636,7 @@ async function fetchMatches({ silent = false } = {}) {
     if (!state.events.length) throw new Error("資料中沒有賽事");
 
     rebuildRatings();
+    rebuildTournamentStats();
     rebuildH2H();
     elements.errorMessage.hidden = true;
     setConnectionStatus("online", "即時資料已連線");

@@ -487,6 +487,110 @@ h2 {
   font-size: 11px;
 }
 
+.tournament-form {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #dfe3dc;
+}
+
+.tournament-form[hidden] {
+  display: none;
+}
+
+.tournament-form-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.tournament-form-heading strong {
+  color: var(--ink);
+  font-size: 11px;
+}
+
+.tournament-form-heading span {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.tournament-form-list {
+  overflow: hidden;
+  border: 1px solid #e4e7e1;
+  border-radius: 9px;
+}
+
+.tournament-team-row {
+  display: grid;
+  grid-template-columns: minmax(105px, 1.25fr) 100px 64px auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #eceee9;
+  font-size: 10px;
+}
+
+.tournament-team-row:last-child {
+  border-bottom: 0;
+}
+
+.tournament-team {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 7px;
+}
+
+.tournament-team img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.tournament-team strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tournament-record,
+.tournament-goals {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.tournament-record b {
+  color: var(--ink);
+}
+
+.tournament-recent {
+  display: flex;
+  justify-content: flex-end;
+  gap: 3px;
+}
+
+.form-result {
+  display: grid;
+  width: 19px;
+  height: 19px;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.form-result.w { background: var(--green); }
+.form-result.d { background: #9ba59f; }
+.form-result.l { background: #d95a50; }
+
+.form-empty {
+  color: #9ba59f;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
 .goal-events {
   margin-top: 12px;
   padding-top: 12px;
@@ -991,6 +1095,15 @@ footer p {
 
   .goal-event {
     grid-template-columns: 40px 58px minmax(0, 1fr);
+  }
+
+  .tournament-team-row {
+    grid-template-columns: minmax(90px, 1fr) 86px auto;
+    gap: 5px;
+  }
+
+  .tournament-goals {
+    display: none;
   }
 
   .goal-event small {
