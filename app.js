@@ -84,6 +84,7 @@ const stageNames = {
 };
 
 const sourceTeamAliases = {
+  "Bosnia-Herzegovina": "Bosnia and Herzegovina",
   "Congo DR": "DR Congo",
   "Czech Republic": "Czechia",
   "Cape Verde": "Cape Verde Islands"
@@ -325,8 +326,6 @@ function rebuildTournamentStats() {
 
       home.recent.push({ result: homeResult, score: `${homeScore}:${awayScore}`, opponent: match.away.name });
       away.recent.push({ result: awayResult, score: `${awayScore}:${homeScore}`, opponent: match.home.name });
-      home.recent = home.recent.slice(-3);
-      away.recent = away.recent.slice(-3);
     });
   state.tournamentStats = stats;
 }
