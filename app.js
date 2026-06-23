@@ -153,6 +153,24 @@ function normalizeEvent(event) {
   const home = competitors.find((item) => item.homeAway === "home") || competitors[0];
   const away = competitors.find((item) => item.homeAway === "away") || competitors[1];
   const status = event.status?.type || competition.status?.type || {};
+  const goals = (competition.details || [])
+    .filter((detail) => detail.scoringPlay)
+    .map((detail) => {
+      const athlete = detail.athletesInvolved?.[0] || {};
+      return {
+        minute: detail.clock?.displayValue || "--",
+        clockValue: Number(detail.clock?.value || 0),
+        teamId: String(detail.team?.id || ""),
+        scorer: athlete.displayName || "球員資料未提供",
+        jersey: athlete.jersey || "",
+        position: athlete.position || "",
+        type: detail.type?.text || "Goal",
+        penaltyKick: Boolean(detail.penaltyKick),
+        ownGoal: Boolean(detail.ownGoal),
+        shootout: Boolean(detail.shootout)
+      };
+    })
+    .sort((a, b) => a.clockValue - b.clockValue);
 
   return {
     id: event.id,
@@ -163,19 +181,78 @@ function normalizeEvent(event) {
     statusDetail: status.shortDetail || status.detail || "",
     completed: Boolean(status.completed),
     home: {
+      id: String(home?.team?.id || ""),
       sourceName: home?.team?.displayName || "TBD",
       name: localTeamName(home?.team?.displayName || "待定"),
       score: home?.score ?? "-",
       logo: home?.team?.logo || ""
     },
     away: {
+      id: String(away?.team?.id || ""),
       sourceName: away?.team?.displayName || "TBD",
       name: localTeamName(away?.team?.displayName || "待定"),
       score: away?.score ?? "-",
       logo: away?.team?.logo || ""
     },
-    venue: competition.venue?.fullName || "場地待定"
+    venue: competition.venue?.fullName || "場地待定",
+    goals
   };
+}
+
+function positionName(position) {
+  const code = String(position || "").toUpperCase();
+  const exact = {
+    GK: "守門員", CB: "中後衛", LB: "左後衛", RB: "右後衛",
+    DM: "防守中場", CM: "中場", AM: "攻擊中場", LM: "左中場",
+    RM: "右中場", LW: "左翼", RW: "右翼", ST: "前鋒",
+    CF: "前鋒", F: "前鋒", SUB: "替補"
+  };
+  if (exact[code]) return exact[code];
+  if (code.startsWith("CD")) return "中後衛";
+  if (code.startsWith("CM")) return "中場";
+  if (code.startsWith("AM")) return "攻擊中場";
+  if (code.startsWith("DM")) return "防守中場";
+  if (code.startsWith("F")) return "前鋒";
+  if (code.startsWith("W")) return "邊鋒";
+  return position || "";
+}
+
+function goalTypeName(goal) {
+  if (goal.shootout) return "PK 大戰";
+  if (goal.ownGoal) return "烏龍球";
+  if (goal.penaltyKick) return "點球";
+  if (goal.type.toLowerCase().includes("header")) return "頭球";
+  return "進球";
+}
+
+function renderGoals(card, match) {
+  if (match.statusState === "pre") return;
+  const panel = card.querySelector(".goal-events");
+  const list = panel.querySelector(".goal-list");
+  panel.hidden = false;
+  panel.querySelector(".goal-count").textContent = match.goals.length
+    ? `${match.goals.length} 球`
+    : match.completed ? "本場無進球" : "目前無進球";
+
+  if (!match.goals.length) {
+    panel.classList.add("no-goals");
+    return;
+  }
+
+  match.goals.forEach((goal) => {
+    const team = goal.teamId === match.home.id ? match.home : match.away;
+    const details = [goal.jersey ? `#${goal.jersey}` : "", positionName(goal.position), goalTypeName(goal)]
+      .filter(Boolean)
+      .join(" · ");
+    const row = document.createElement("div");
+    row.className = "goal-event";
+    row.innerHTML =
+      `<time>${goal.minute}</time>` +
+      `<span class="goal-team">${team.name}</span>` +
+      `<strong>${goal.scorer}</strong>` +
+      `<small>${details}</small>`;
+    list.append(row);
+  });
 }
 
 function updateElo(ratings, match) {
@@ -352,6 +429,7 @@ function createMatchCard(match) {
   awayLogo.alt = `${match.away.name}隊徽`;
   awayLogo.hidden = !match.away.logo;
   card.querySelector(".away-team .team-name").textContent = match.away.name;
+  renderGoals(card, match);
 
   if (match.statusState === "pre") {
     const prediction = predictMatch(match);

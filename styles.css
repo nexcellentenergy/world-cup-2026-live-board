@@ -487,6 +487,93 @@ h2 {
   font-size: 11px;
 }
 
+.goal-events {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #dfe3dc;
+}
+
+.goal-events[hidden] {
+  display: none;
+}
+
+.goal-events-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.goal-events-heading strong {
+  color: var(--ink);
+  font-size: 11px;
+}
+
+.goal-count {
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.goal-list {
+  overflow: hidden;
+  border: 1px solid #e4e7e1;
+  border-radius: 9px;
+}
+
+.goal-event {
+  display: grid;
+  grid-template-columns: 42px 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #eceee9;
+  font-size: 10px;
+}
+
+.goal-event:last-child {
+  border-bottom: 0;
+}
+
+.goal-event time {
+  color: white;
+  padding: 3px 4px;
+  border-radius: 5px;
+  background: var(--green);
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.goal-team {
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.goal-event strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.goal-event small {
+  color: #8a6a14;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.goal-events.no-goals .goal-events-heading {
+  margin-bottom: 0;
+}
+
+.goal-events.no-goals .goal-count {
+  color: var(--muted);
+  font-weight: 500;
+}
+
 .prediction {
   margin-top: 12px;
   padding-top: 12px;
@@ -900,6 +987,15 @@ footer p {
     grid-template-columns: 60px minmax(0, 1fr) 44px minmax(0, 1fr);
     gap: 5px;
     font-size: 9px;
+  }
+
+  .goal-event {
+    grid-template-columns: 40px 58px minmax(0, 1fr);
+  }
+
+  .goal-event small {
+    grid-column: 3;
+    margin-top: -5px;
   }
 
   .status-section-heading small {
