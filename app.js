@@ -83,6 +83,12 @@ const stageNames = {
   final: "冠軍賽"
 };
 
+const sourceTeamAliases = {
+  "Congo DR": "DR Congo",
+  "Czech Republic": "Czechia",
+  "Cape Verde": "Cape Verde Islands"
+};
+
 const state = {
   events: [],
   ratings: { ...BASE_ELO },
@@ -137,6 +143,10 @@ function localTeamName(name) {
   return teamNames[name] || name;
 }
 
+function canonicalTeamName(name) {
+  return sourceTeamAliases[name] || name;
+}
+
 function taiwanDateKey(dateValue) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: TAIWAN_TIME_ZONE,
@@ -154,6 +164,8 @@ function normalizeEvent(event) {
   const home = competitors.find((item) => item.homeAway === "home") || competitors[0];
   const away = competitors.find((item) => item.homeAway === "away") || competitors[1];
   const status = event.status?.type || competition.status?.type || {};
+  const homeSourceName = canonicalTeamName(home?.team?.displayName || "TBD");
+  const awaySourceName = canonicalTeamName(away?.team?.displayName || "TBD");
   const goals = (competition.details || [])
     .filter((detail) => detail.scoringPlay)
     .map((detail) => {
@@ -183,15 +195,15 @@ function normalizeEvent(event) {
     completed: Boolean(status.completed),
     home: {
       id: String(home?.team?.id || ""),
-      sourceName: home?.team?.displayName || "TBD",
-      name: localTeamName(home?.team?.displayName || "待定"),
+      sourceName: homeSourceName,
+      name: localTeamName(homeSourceName === "TBD" ? "待定" : homeSourceName),
       score: home?.score ?? "-",
       logo: home?.team?.logo || ""
     },
     away: {
       id: String(away?.team?.id || ""),
-      sourceName: away?.team?.displayName || "TBD",
-      name: localTeamName(away?.team?.displayName || "待定"),
+      sourceName: awaySourceName,
+      name: localTeamName(awaySourceName === "TBD" ? "待定" : awaySourceName),
       score: away?.score ?? "-",
       logo: away?.team?.logo || ""
     },
@@ -331,7 +343,11 @@ function renderTournamentStats(card, match) {
     row.className = "tournament-team-row";
     const recent = stats.recent.length
       ? stats.recent.map((game) =>
-          `<span class="form-result ${game.result.toLowerCase()}" title="對 ${game.opponent} ${game.score}">${game.result}</span>`
+          `<span class="tournament-game">` +
+            `<i class="form-result ${game.result.toLowerCase()}">${game.result}</i>` +
+            `<em>對 ${game.opponent}</em>` +
+            `<b>${game.score}</b>` +
+          `</span>`
         ).join("")
       : '<span class="form-empty">尚未出賽</span>';
     row.innerHTML =

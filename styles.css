@@ -565,9 +565,36 @@ h2 {
 }
 
 .tournament-recent {
-  display: flex;
-  justify-content: flex-end;
-  gap: 3px;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.tournament-game {
+  display: grid;
+  grid-template-columns: 19px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: var(--muted);
+  background: #f0f2ed;
+}
+
+.tournament-game em {
+  overflow: hidden;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tournament-game b {
+  color: var(--ink);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
 }
 
 .form-result {
@@ -1104,6 +1131,10 @@ footer p {
 
   .tournament-goals {
     display: none;
+  }
+
+  .tournament-recent {
+    grid-template-columns: 1fr;
   }
 
   .goal-event small {
