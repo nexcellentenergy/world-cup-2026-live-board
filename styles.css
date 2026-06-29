@@ -393,13 +393,15 @@ h2 {
 
 .knockout-bracket {
   margin: 0 0 34px;
-  padding: 20px;
-  border: 1px solid rgba(12, 79, 50, 0.14);
-  border-radius: 20px;
+  padding: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(201, 242, 75, 0.22);
+  border-radius: 24px;
+  color: white;
   background:
-    linear-gradient(135deg, rgba(12, 79, 50, 0.08), rgba(255, 255, 255, 0.72)),
-    var(--card);
-  box-shadow: var(--shadow);
+    radial-gradient(circle at 50% 28%, rgba(201, 242, 75, 0.2), transparent 20rem),
+    linear-gradient(135deg, #062015 0%, #173019 42%, #0d9a45 100%);
+  box-shadow: 0 24px 60px rgba(7, 26, 18, 0.22);
 }
 
 .knockout-bracket[hidden] {
@@ -411,117 +413,171 @@ h2 {
   align-items: end;
   justify-content: space-between;
   gap: 18px;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .bracket-heading h3 {
   margin: 0;
-  font-size: clamp(25px, 3vw, 36px);
+  display: inline-block;
+  padding: 8px 18px;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-radius: 7px;
+  color: white;
+  background: rgba(6, 9, 24, 0.78);
+  box-shadow: 0 7px 0 rgba(0, 0, 0, 0.24);
+  font-size: clamp(22px, 3vw, 34px);
   letter-spacing: -0.04em;
 }
 
 .bracket-heading span {
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 12px;
 }
 
-.bracket-columns {
-  display: grid;
-  grid-auto-columns: minmax(210px, 1fr);
-  grid-auto-flow: column;
-  gap: 14px;
-  overflow-x: auto;
-  padding: 4px 2px 12px;
-  scrollbar-color: var(--green) rgba(12, 79, 50, 0.08);
+.knockout-bracket .section-kicker {
+  color: var(--lime);
 }
 
-.bracket-column {
+.bracket-shell {
+  display: grid;
+  grid-template-columns: minmax(520px, 1fr) 190px minmax(520px, 1fr);
+  gap: 18px;
+  overflow-x: auto;
+  padding: 6px 4px 16px;
+  scrollbar-color: var(--lime) rgba(255, 255, 255, 0.12);
+}
+
+.bracket-side {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(118px, 1fr));
+  gap: 14px;
+  min-height: 690px;
+}
+
+.bracket-side-right {
+  direction: rtl;
+}
+
+.bracket-side-right .bracket-stage,
+.bracket-side-right .bracket-match {
+  direction: ltr;
+}
+
+.bracket-stage {
   position: relative;
   display: grid;
-  align-content: center;
-  gap: 12px;
-  min-width: 210px;
+  grid-template-rows: 24px 1fr;
+  min-width: 0;
 }
 
-.bracket-column:not(:last-child)::after {
+.bracket-stage h4 {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  text-align: center;
+}
+
+.bracket-stage-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 10px;
+  min-height: 0;
+}
+
+.bracket-stage:not(.bracket-stage-r32) .bracket-stage-list::before {
   content: "";
   position: absolute;
-  top: 50%;
-  right: -14px;
-  width: 14px;
-  border-top: 2px solid rgba(12, 79, 50, 0.28);
+  top: 7%;
+  bottom: 7%;
+  left: -8px;
+  border-left: 2px solid rgba(255, 255, 255, 0.62);
 }
 
-.bracket-column h4 {
-  margin: 0;
-  color: var(--green);
-  font-size: 13px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+.bracket-stage-left:not(.bracket-stage-r32) .bracket-stage-list::before {
+  left: -8px;
+}
+
+.bracket-stage-right:not(.bracket-stage-r32) .bracket-stage-list::before {
+  right: -8px;
+  left: auto;
 }
 
 .bracket-match {
   position: relative;
   display: grid;
-  gap: 8px;
+  gap: 5px;
   width: 100%;
-  padding: 12px;
-  border: 1px solid #dfe5dc;
-  border-radius: 13px;
+  min-height: 52px;
+  padding: 7px 8px;
+  border: 2px solid #eaf0e7;
+  border-radius: 3px;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 8px 20px rgba(8, 35, 23, 0.055);
+  background: white;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.28);
   text-align: left;
 }
 
 .bracket-match:hover {
-  border-color: var(--green);
-  transform: translateY(-1px);
+  border-color: var(--lime);
+  transform: translateY(-2px);
 }
 
 .bracket-match::before {
   content: "";
   position: absolute;
-  left: -7px;
   top: 50%;
-  width: 7px;
-  border-top: 2px solid rgba(12, 79, 50, 0.26);
+  width: 12px;
+  border-top: 2px solid rgba(255, 255, 255, 0.62);
+}
+
+.bracket-node-left::before,
+.bracket-node-center::before {
+  left: -14px;
+}
+
+.bracket-node-right::before {
+  right: -14px;
 }
 
 .bracket-time,
 .bracket-match small {
   overflow: hidden;
-  color: var(--muted);
-  font-size: 10px;
+  color: #69756d;
+  font-size: 9px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .bracket-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
-  gap: 7px;
+  gap: 3px;
 }
 
 .bracket-row b {
   overflow: hidden;
-  font-size: 12px;
+  font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.bracket-row b:last-child {
-  text-align: right;
+.bracket-row b:last-child::before {
+  content: "vs ";
+  color: #7a867f;
+  font-weight: 500;
 }
 
 .bracket-row strong {
-  min-width: 48px;
-  padding: 5px 7px;
-  border-radius: 8px;
+  justify-self: start;
+  min-width: 45px;
+  padding: 3px 6px;
+  border-radius: 4px;
   color: white;
   background: var(--green);
-  font-size: 12px;
+  font-size: 11px;
   text-align: center;
 }
 
@@ -535,6 +591,51 @@ h2 {
 
 .bracket-match.is-completed {
   background: #f7f8f4;
+}
+
+.bracket-center {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 10px;
+  min-height: 690px;
+  text-align: center;
+}
+
+.bracket-trophy {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 38px;
+}
+
+.bracket-center > strong,
+.third-label {
+  color: white;
+  font-size: 12px;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.45);
+}
+
+.bracket-center .bracket-match {
+  width: min(170px, 100%);
+}
+
+.third-label {
+  margin-top: 14px;
+}
+
+.bracket-placeholder {
+  width: min(170px, 100%);
+  padding: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 3px;
+  color: var(--ink);
+  background: white;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .status-section-heading {

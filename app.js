@@ -497,6 +497,54 @@ function toggleMatchCard(card, forceOpen) {
   if (cue) cue.textContent = isOpen ? "收合詳情" : "點開看詳情";
 }
 
+function openMatchFromBracket(matchId) {
+  state.filter = "all";
+  document.querySelector(".filter-tab.active")?.classList.remove("active");
+  document.querySelector('[data-filter="all"]').classList.add("active");
+  render();
+  requestAnimationFrame(() => {
+    const card = document.querySelector(`#match-${CSS.escape(matchId)}`);
+    if (!card) return;
+    toggleMatchCard(card, true);
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+}
+
+function createBracketMatchButton(match, side = "center") {
+  const item = document.createElement("button");
+  item.type = "button";
+  item.className =
+    `bracket-match bracket-node-${side} ${match.statusState === "in" ? "is-live" : ""} ${match.completed ? "is-completed" : ""}`;
+  item.dataset.matchId = match.id;
+  item.innerHTML =
+    `<span class="bracket-time">${match.completed ? "已完賽" : fullDateTimeFormatter.format(match.date)}</span>` +
+    `<span class="bracket-row"><b>${match.home.name}</b><strong>${matchScoreText(match)}</strong><b>${match.away.name}</b></span>` +
+    `<small>${match.venue}</small>`;
+  item.addEventListener("click", () => openMatchFromBracket(match.id));
+  return item;
+}
+
+function splitBracket(matches) {
+  const middle = Math.ceil(matches.length / 2);
+  return {
+    left: matches.slice(0, middle),
+    right: matches.slice(middle)
+  };
+}
+
+function createBracketStage(title, matches, side, stageClass) {
+  const column = document.createElement("section");
+  column.className = `bracket-stage bracket-stage-${stageClass} bracket-stage-${side}`;
+  column.style.setProperty("--match-count", Math.max(matches.length, 1));
+  column.innerHTML = `<h4>${title}</h4>`;
+
+  const list = document.createElement("div");
+  list.className = "bracket-stage-list";
+  matches.forEach((match) => list.append(createBracketMatchButton(match, side)));
+  column.append(list);
+  return column;
+}
+
 function renderKnockoutBracket() {
   const bracket = elements.knockoutBracket;
   const knockoutMatches = state.events.filter(isKnockoutMatch);
@@ -507,54 +555,66 @@ function renderKnockoutBracket() {
     return;
   }
 
+  const byStage = Object.fromEntries(
+    KNOCKOUT_STAGES.map((stage) => [
+      stage.slug,
+      knockoutMatches
+        .filter((match) => match.stageSlug === stage.slug)
+        .sort((a, b) => a.date - b.date)
+    ])
+  );
+  const round32 = splitBracket(byStage["round-of-32"] || []);
+  const round16 = splitBracket(byStage["round-of-16"] || []);
+  const quarterfinals = splitBracket(byStage.quarterfinals || []);
+  const semifinals = splitBracket(byStage.semifinals || []);
+  const finalMatch = (byStage.final || [])[0];
+  const thirdPlaceMatch = (byStage["third-place"] || [])[0];
+
   bracket.hidden = false;
   const heading = document.createElement("div");
   heading.className = "bracket-heading";
   heading.innerHTML =
-    "<div><p class=\"section-kicker\">KNOCKOUT BRACKET</p><h3>淘汰賽樹狀賽程</h3></div>" +
-    "<span>點擊任一場可跳到比賽卡詳情</span>";
+    "<div><p class=\"section-kicker\">KNOCKOUT BRACKET</p><h3>2026 世界盃 32 強淘汰賽</h3></div>" +
+    "<span>左右半區往中央決賽匯合，點擊任一格可看比賽詳情</span>";
 
-  const columns = document.createElement("div");
-  columns.className = "bracket-columns";
+  const shell = document.createElement("div");
+  shell.className = "bracket-shell";
 
-  KNOCKOUT_STAGES.forEach((stage) => {
-    const matches = knockoutMatches
-      .filter((match) => match.stageSlug === stage.slug)
-      .sort((a, b) => a.date - b.date);
-    if (!matches.length) return;
+  const left = document.createElement("div");
+  left.className = "bracket-side bracket-side-left";
+  left.append(
+    createBracketStage("32 強", round32.left, "left", "r32"),
+    createBracketStage("16 強", round16.left, "left", "r16"),
+    createBracketStage("8 強", quarterfinals.left, "left", "qf"),
+    createBracketStage("4 強", semifinals.left, "left", "sf")
+  );
 
-    const column = document.createElement("section");
-    column.className = `bracket-column bracket-${stage.slug}`;
-    column.innerHTML = `<h4>${stage.label}</h4>`;
+  const center = document.createElement("div");
+  center.className = "bracket-center";
+  center.innerHTML = "<div class=\"bracket-trophy\" aria-hidden=\"true\">🏆</div><strong>決賽</strong>";
+  if (finalMatch) {
+    center.append(createBracketMatchButton(finalMatch, "center"));
+  } else {
+    center.insertAdjacentHTML("beforeend", "<div class=\"bracket-placeholder\">決賽待定</div>");
+  }
+  center.insertAdjacentHTML("beforeend", "<span class=\"third-label\">季軍賽</span>");
+  if (thirdPlaceMatch) {
+    center.append(createBracketMatchButton(thirdPlaceMatch, "center"));
+  } else {
+    center.insertAdjacentHTML("beforeend", "<div class=\"bracket-placeholder\">季軍賽待定</div>");
+  }
 
-    matches.forEach((match) => {
-      const item = document.createElement("button");
-      item.type = "button";
-      item.className = `bracket-match ${match.statusState === "in" ? "is-live" : ""} ${match.completed ? "is-completed" : ""}`;
-      item.dataset.matchId = match.id;
-      item.innerHTML =
-        `<span class="bracket-time">${match.completed ? "已完賽" : fullDateTimeFormatter.format(match.date)}</span>` +
-        `<span class="bracket-row"><b>${match.home.name}</b><strong>${matchScoreText(match)}</strong><b>${match.away.name}</b></span>` +
-        `<small>${match.venue}</small>`;
-      item.addEventListener("click", () => {
-        state.filter = "all";
-        document.querySelector(".filter-tab.active")?.classList.remove("active");
-        document.querySelector('[data-filter="all"]').classList.add("active");
-        render();
-        requestAnimationFrame(() => {
-          const card = document.querySelector(`#match-${CSS.escape(match.id)}`);
-          if (!card) return;
-          toggleMatchCard(card, true);
-          card.scrollIntoView({ behavior: "smooth", block: "center" });
-        });
-      });
-      column.append(item);
-    });
+  const right = document.createElement("div");
+  right.className = "bracket-side bracket-side-right";
+  right.append(
+    createBracketStage("4 強", semifinals.right, "right", "sf"),
+    createBracketStage("8 強", quarterfinals.right, "right", "qf"),
+    createBracketStage("16 強", round16.right, "right", "r16"),
+    createBracketStage("32 強", round32.right, "right", "r32")
+  );
 
-    columns.append(column);
-  });
-
-  bracket.append(heading, columns);
+  shell.append(left, center, right);
+  bracket.append(heading, shell);
 }
 
 function groupMatches(matches) {
