@@ -392,9 +392,13 @@ h2 {
 }
 
 .knockout-bracket {
+  position: relative;
+  left: 50%;
+  width: min(100vw - 24px, 1580px);
   margin: 0 0 34px;
-  padding: 22px;
+  padding: 22px clamp(14px, 2.2vw, 32px);
   overflow: hidden;
+  transform: translateX(-50%);
   border: 1px solid rgba(201, 242, 75, 0.22);
   border-radius: 24px;
   color: white;
@@ -440,8 +444,8 @@ h2 {
 
 .bracket-shell {
   display: grid;
-  grid-template-columns: minmax(600px, 1fr) 180px minmax(600px, 1fr);
-  gap: 22px;
+  grid-template-columns: minmax(620px, 1fr) 170px minmax(620px, 1fr);
+  gap: clamp(14px, 1.6vw, 24px);
   overflow-x: auto;
   padding: 6px 4px 16px;
   scrollbar-color: var(--lime) rgba(255, 255, 255, 0.12);
@@ -449,8 +453,8 @@ h2 {
 
 .bracket-side {
   display: grid;
-  grid-template-columns: repeat(4, minmax(128px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(4, minmax(136px, 1fr));
+  gap: clamp(10px, 1vw, 15px);
   min-height: 690px;
 }
 
@@ -506,7 +510,7 @@ h2 {
   gap: 5px;
   width: 100%;
   height: 66px;
-  padding: 7px 8px;
+  padding: 7px;
   border: 2px solid #eaf0e7;
   border-radius: 3px;
   color: var(--ink);
@@ -538,7 +542,7 @@ h2 {
 }
 
 .bracket-time,
-.bracket-match small {
+.bracket-flag-slot span {
   overflow: hidden;
   color: #69756d;
   font-size: 9px;
@@ -546,34 +550,52 @@ h2 {
   white-space: nowrap;
 }
 
-.bracket-match small {
-  display: none;
-}
-
 .bracket-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 3px;
+  gap: 6px;
 }
 
-.bracket-row b {
-  overflow: hidden;
-  font-size: 11px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.bracket-flag-slot {
+  display: grid;
+  grid-template-rows: 26px 1fr;
+  min-width: 0;
+  place-items: center;
+  gap: 2px;
 }
 
-.bracket-row b:last-child::before {
-  content: "vs ";
-  color: #7a867f;
-  font-weight: 500;
+.bracket-flag-slot img,
+.bracket-flag-slot.is-empty::before {
+  display: block;
+  width: 34px;
+  height: 24px;
+  border: 1px solid rgba(16, 37, 27, 0.18);
+  border-radius: 3px;
+  background: #f7f8f4;
+  object-fit: cover;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.bracket-flag-slot.is-empty::before {
+  content: "";
+  border-style: dashed;
+  background:
+    linear-gradient(135deg, transparent 47%, rgba(16, 37, 27, 0.16) 48%, rgba(16, 37, 27, 0.16) 52%, transparent 53%),
+    #f7f8f4;
+}
+
+.bracket-flag-slot span {
+  max-width: 100%;
+  color: #25362d;
+  font-size: 9px;
+  font-weight: 800;
+  text-align: center;
 }
 
 .bracket-row strong {
-  justify-self: start;
-  min-width: 45px;
-  padding: 3px 6px;
+  min-width: 42px;
+  padding: 4px 6px;
   border-radius: 4px;
   color: white;
   background: var(--green);
@@ -620,7 +642,7 @@ h2 {
 }
 
 .bracket-center .bracket-match {
-  width: min(160px, 100%);
+  width: min(150px, 100%);
 }
 
 .third-label {
@@ -628,7 +650,7 @@ h2 {
 }
 
 .bracket-placeholder {
-  width: min(160px, 100%);
+  width: min(150px, 100%);
   padding: 10px;
   border: 2px solid rgba(255, 255, 255, 0.5);
   border-radius: 3px;

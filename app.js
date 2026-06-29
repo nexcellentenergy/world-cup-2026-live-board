@@ -510,16 +510,35 @@ function openMatchFromBracket(matchId) {
   });
 }
 
+function bracketTeamFlag(team, sideLabel) {
+  const isKnown = team.sourceName !== "TBD" && Boolean(team.logo);
+  const label = isKnown ? team.name : `${sideLabel}待定`;
+  return (
+    `<span class="bracket-flag-slot ${isKnown ? "" : "is-empty"}" title="${label}" aria-label="${label}">` +
+      (isKnown ? `<img src="${team.logo}" alt="${team.name}">` : "") +
+      `<span>${isKnown ? team.name : ""}</span>` +
+    `</span>`
+  );
+}
+
 function createBracketMatchButton(match, side = "center") {
   const item = document.createElement("button");
   item.type = "button";
   item.className =
     `bracket-match bracket-node-${side} ${match.statusState === "in" ? "is-live" : ""} ${match.completed ? "is-completed" : ""}`;
+  item.setAttribute(
+    "aria-label",
+    `${match.stage}：${match.home.name} 對 ${match.away.name}，${matchScoreText(match)}，點擊查看比賽卡`
+  );
+  item.title = `${match.home.name} vs ${match.away.name}`;
   item.dataset.matchId = match.id;
   item.innerHTML =
     `<span class="bracket-time">${match.completed ? "已完賽" : fullDateTimeFormatter.format(match.date)}</span>` +
-    `<span class="bracket-row"><b>${match.home.name}</b><strong>${matchScoreText(match)}</strong><b>${match.away.name}</b></span>` +
-    `<small>${match.venue}</small>`;
+    `<span class="bracket-row">` +
+      bracketTeamFlag(match.home, "主隊") +
+      `<strong>${matchScoreText(match)}</strong>` +
+      bracketTeamFlag(match.away, "客隊") +
+    `</span>`;
   item.addEventListener("click", () => openMatchFromBracket(match.id));
   return item;
 }
