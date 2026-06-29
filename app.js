@@ -3,6 +3,14 @@ const API_URL =
 const REFRESH_INTERVAL = 60_000;
 const INITIAL_DATE_GROUPS = 7;
 const TAIWAN_TIME_ZONE = "Asia/Taipei";
+const KNOCKOUT_STAGES = [
+  { slug: "round-of-32", label: "32 強" },
+  { slug: "round-of-16", label: "16 強" },
+  { slug: "quarterfinals", label: "8 強" },
+  { slug: "semifinals", label: "4 強" },
+  { slug: "third-place", label: "季軍賽" },
+  { slug: "final", label: "冠軍賽" }
+];
 
 // Elo ratings calculated from 49,000+ international results through 2026-06-10.
 const BASE_ELO = {
@@ -103,6 +111,7 @@ const state = {
 
 const elements = {
   schedule: document.querySelector("#schedule"),
+  knockoutBracket: document.querySelector("#knockoutBracket"),
   template: document.querySelector("#matchTemplate"),
   refreshButton: document.querySelector("#refreshButton"),
   connectionStatus: document.querySelector("#connectionStatus"),
@@ -190,6 +199,7 @@ function normalizeEvent(event) {
     id: event.id,
     date: new Date(event.date),
     dateKey: taiwanDateKey(event.date),
+    stageSlug: event.season?.slug || "",
     stage: stageNames[event.season?.slug] || event.season?.slug || "世界盃",
     statusState: status.state || "pre",
     statusDetail: status.shortDetail || status.detail || "",
@@ -468,6 +478,85 @@ function matchPassesFilter(match) {
   return true;
 }
 
+function isKnockoutMatch(match) {
+  return KNOCKOUT_STAGES.some((stage) => stage.slug === match.stageSlug);
+}
+
+function matchScoreText(match) {
+  return match.statusState === "pre" ? "VS" : `${match.home.score} : ${match.away.score}`;
+}
+
+function toggleMatchCard(card, forceOpen) {
+  const summary = card.querySelector(".match-summary");
+  const details = card.querySelector(".match-details");
+  const cue = card.querySelector(".expand-cue");
+  const isOpen = forceOpen ?? details.hidden;
+  details.hidden = !isOpen;
+  summary.setAttribute("aria-expanded", String(isOpen));
+  card.classList.toggle("is-expanded", isOpen);
+  if (cue) cue.textContent = isOpen ? "收合詳情" : "點開看詳情";
+}
+
+function renderKnockoutBracket() {
+  const bracket = elements.knockoutBracket;
+  const knockoutMatches = state.events.filter(isKnockoutMatch);
+  bracket.replaceChildren();
+
+  if (!knockoutMatches.length) {
+    bracket.hidden = true;
+    return;
+  }
+
+  bracket.hidden = false;
+  const heading = document.createElement("div");
+  heading.className = "bracket-heading";
+  heading.innerHTML =
+    "<div><p class=\"section-kicker\">KNOCKOUT BRACKET</p><h3>淘汰賽樹狀賽程</h3></div>" +
+    "<span>點擊任一場可跳到比賽卡詳情</span>";
+
+  const columns = document.createElement("div");
+  columns.className = "bracket-columns";
+
+  KNOCKOUT_STAGES.forEach((stage) => {
+    const matches = knockoutMatches
+      .filter((match) => match.stageSlug === stage.slug)
+      .sort((a, b) => a.date - b.date);
+    if (!matches.length) return;
+
+    const column = document.createElement("section");
+    column.className = `bracket-column bracket-${stage.slug}`;
+    column.innerHTML = `<h4>${stage.label}</h4>`;
+
+    matches.forEach((match) => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = `bracket-match ${match.statusState === "in" ? "is-live" : ""} ${match.completed ? "is-completed" : ""}`;
+      item.dataset.matchId = match.id;
+      item.innerHTML =
+        `<span class="bracket-time">${match.completed ? "已完賽" : fullDateTimeFormatter.format(match.date)}</span>` +
+        `<span class="bracket-row"><b>${match.home.name}</b><strong>${matchScoreText(match)}</strong><b>${match.away.name}</b></span>` +
+        `<small>${match.venue}</small>`;
+      item.addEventListener("click", () => {
+        state.filter = "all";
+        document.querySelector(".filter-tab.active")?.classList.remove("active");
+        document.querySelector('[data-filter="all"]').classList.add("active");
+        render();
+        requestAnimationFrame(() => {
+          const card = document.querySelector(`#match-${CSS.escape(match.id)}`);
+          if (!card) return;
+          toggleMatchCard(card, true);
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+      });
+      column.append(item);
+    });
+
+    columns.append(column);
+  });
+
+  bracket.append(heading, columns);
+}
+
 function groupMatches(matches) {
   return matches.reduce((groups, match) => {
     if (!groups.has(match.dateKey)) groups.set(match.dateKey, []);
@@ -484,12 +573,12 @@ function createMatchCard(match) {
   const kickoff = card.querySelector(".kickoff");
 
   card.dataset.matchId = match.id;
+  card.id = `match-${match.id}`;
   card.classList.toggle("is-live", match.statusState === "in");
   card.querySelector(".match-stage").textContent = match.stage;
   status.textContent = statusText(match);
   status.classList.toggle("live", match.statusState === "in");
-  score.textContent =
-    match.statusState === "pre" ? "VS" : `${match.home.score} : ${match.away.score}`;
+  score.textContent = matchScoreText(match);
   kickoffLabel.textContent = match.completed ? "開賽時間" : "台灣時間";
   kickoff.textContent = timeFormatter.format(match.date);
   card.querySelector(".venue").textContent = match.venue;
@@ -520,6 +609,8 @@ function createMatchCard(match) {
     panel.querySelector(".prob-away-label").textContent = `${match.away.name} ${prediction.away}%`;
     renderH2H(card, match);
   }
+
+  card.querySelector(".match-summary").addEventListener("click", () => toggleMatchCard(card));
 
   return card;
 }
@@ -559,6 +650,7 @@ function render() {
   const grouped = groupMatches(filtered);
   const entries = [...grouped.entries()];
 
+  renderKnockoutBracket();
   elements.schedule.replaceChildren();
 
   if (state.filter === "all") {

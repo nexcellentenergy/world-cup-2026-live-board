@@ -97,6 +97,8 @@
           <span>依 2016–2026 國家隊歷史賽果建立 Elo 實力值，並納入本屆已完賽結果即時重算。顯示為正規時間勝／和／負機率，不是台灣運彩賠率或投注建議。</span>
         </aside>
 
+        <section id="knockoutBracket" class="knockout-bracket" aria-label="淘汰賽樹狀賽程" hidden></section>
+
         <div id="schedule" class="schedule" aria-live="polite">
           <div class="loading-state">
             <div class="loader"></div>
@@ -116,64 +118,69 @@
 
   <template id="matchTemplate">
     <article class="match-card">
-      <div class="match-meta">
-        <span class="match-stage"></span>
-        <span class="match-status"></span>
-      </div>
-      <div class="match-body">
-        <div class="team home-team">
-          <img class="team-logo" alt="">
-          <span class="team-name"></span>
+      <button class="match-summary" type="button" aria-expanded="false">
+        <div class="match-meta">
+          <span class="match-stage"></span>
+          <span class="match-status"></span>
         </div>
-        <div class="score-block">
-          <strong class="score"></strong>
-          <span class="kickoff-label"></span>
-          <strong class="kickoff"></strong>
+        <div class="match-body">
+          <div class="team home-team">
+            <img class="team-logo" alt="">
+            <span class="team-name"></span>
+          </div>
+          <div class="score-block">
+            <strong class="score"></strong>
+            <span class="kickoff-label"></span>
+            <strong class="kickoff"></strong>
+          </div>
+          <div class="team away-team">
+            <img class="team-logo" alt="">
+            <span class="team-name"></span>
+          </div>
         </div>
-        <div class="team away-team">
-          <img class="team-logo" alt="">
-          <span class="team-name"></span>
+        <div class="match-footer">
+          <span class="venue"></span>
+          <span class="expand-cue">點開看詳情</span>
         </div>
-      </div>
-      <div class="match-footer">
-        <span class="venue"></span>
-      </div>
-      <div class="tournament-form" hidden>
-        <div class="tournament-form-heading">
-          <strong>本屆世界盃戰績與對戰歷史</strong>
-          <span>對手・比分・勝和負</span>
+      </button>
+      <div class="match-details" hidden>
+        <div class="tournament-form" hidden>
+          <div class="tournament-form-heading">
+            <strong>本屆世界盃戰績與對戰歷史</strong>
+            <span>對手・比分・勝和負</span>
+          </div>
+          <div class="tournament-form-list"></div>
         </div>
-        <div class="tournament-form-list"></div>
-      </div>
-      <div class="goal-events" hidden>
-        <div class="goal-events-heading">
-          <strong>進球紀錄</strong>
-          <span class="goal-count"></span>
+        <div class="goal-events" hidden>
+          <div class="goal-events-heading">
+            <strong>進球紀錄</strong>
+            <span class="goal-count"></span>
+          </div>
+          <div class="goal-list"></div>
         </div>
-        <div class="goal-list"></div>
-      </div>
-      <div class="prediction" hidden>
-        <div class="prediction-heading">
-          <strong>歷史數據預測</strong>
-          <span>90 分鐘</span>
+        <div class="prediction" hidden>
+          <div class="prediction-heading">
+            <strong>歷史數據預測</strong>
+            <span>90 分鐘</span>
+          </div>
+          <div class="probability-bar" aria-label="勝率預測">
+            <i class="prob-home"></i>
+            <i class="prob-draw"></i>
+            <i class="prob-away"></i>
+          </div>
+          <div class="probability-labels">
+            <span class="prob-home-label"></span>
+            <span class="prob-draw-label"></span>
+            <span class="prob-away-label"></span>
+          </div>
         </div>
-        <div class="probability-bar" aria-label="勝率預測">
-          <i class="prob-home"></i>
-          <i class="prob-draw"></i>
-          <i class="prob-away"></i>
+        <div class="h2h" hidden>
+          <div class="h2h-heading">
+            <strong>兩隊歷史交手</strong>
+            <span class="h2h-summary"></span>
+          </div>
+          <div class="h2h-list"></div>
         </div>
-        <div class="probability-labels">
-          <span class="prob-home-label"></span>
-          <span class="prob-draw-label"></span>
-          <span class="prob-away-label"></span>
-        </div>
-      </div>
-      <div class="h2h" hidden>
-        <div class="h2h-heading">
-          <strong>兩隊歷史交手</strong>
-          <span class="h2h-summary"></span>
-        </div>
-        <div class="h2h-list"></div>
       </div>
     </article>
   </template>
