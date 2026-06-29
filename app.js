@@ -521,6 +521,11 @@ function bracketTeamFlag(team, sideLabel) {
   );
 }
 
+function bracketTimeLabel(match) {
+  const stateLabel = match.statusState === "in" ? "進行中" : match.completed ? "已完賽" : "未開賽";
+  return `${stateLabel} · ${fullDateTimeFormatter.format(match.date)}`;
+}
+
 function createBracketMatchButton(match, side = "center") {
   const item = document.createElement("button");
   item.type = "button";
@@ -533,7 +538,7 @@ function createBracketMatchButton(match, side = "center") {
   item.title = `${match.home.name} vs ${match.away.name}`;
   item.dataset.matchId = match.id;
   item.innerHTML =
-    `<span class="bracket-time">${match.completed ? "已完賽" : fullDateTimeFormatter.format(match.date)}</span>` +
+    `<span class="bracket-time">${bracketTimeLabel(match)}</span>` +
     `<span class="bracket-row">` +
       bracketTeamFlag(match.home, "主隊") +
       `<strong>${matchScoreText(match)}</strong>` +
